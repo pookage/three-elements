@@ -30,6 +30,8 @@ export default class ThreeEntity extends HTMLElement {
 			if(componentRegistry.has(name)) this.#addComponent(name, value);
 			else if (entity.constructor.mappedProperties.includes(name)){
 				this.#mapAttributeToProperty(name, value);
+			} else {
+				console.warn("[ThreeEntity]", name, "does not exist in the component registry");
 			}
 		}
 
