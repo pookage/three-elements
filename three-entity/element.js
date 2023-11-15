@@ -1,6 +1,5 @@
+import { componentRegistry } from "three-ecs";
 import Entity from "three-ecs/entity.js";
-
-import { componentRegistry } from "./../index.js";
 
 
 export default class ThreeEntity extends HTMLElement {
