@@ -27,7 +27,7 @@ export default class ThreeEntity extends HTMLElement {
 
 		for(const { name, value } of this.attributes){
 			if(componentRegistry.has(name)) this.#addComponent(name, value);
-			else if (entity.constructor.mappedProperties.includes(name)){
+			else if ([ ...entity.constructor.mappedProperties, ...Object.keys(entity.constructor.mappings) ].includes(name)){
 				this.#mapAttributeToProperty(name, value);
 			} else {
 				console.warn("[ThreeEntity]", name, "does not exist in the component registry");
@@ -167,6 +167,9 @@ export default class ThreeEntity extends HTMLElement {
 				const visible = value !== "false";
 				this.#entity.applyProperty(name, visible);
 				break
+			}
+			default: {
+				this.#entity.applyProperty(name, value);
 			}
 		}
 	}// #mapAttributeToProperty
