@@ -27,7 +27,7 @@ export default class ThreeEntity extends HTMLElement {
 
 		for(const { name, value } of this.attributes){
 			if(componentRegistry.has(name)) this.#addComponent(name, value);
-			else if ([ ...entity.constructor.mappedProperties, ...Object.keys(entity.constructor.mappings) ].includes(name)){
+			else if (Object.keys(entity.constructor.mappings).includes(name)){
 				this.#mapAttributeToProperty(name, value);
 			} else {
 				console.warn("[ThreeEntity]", name, "does not exist in the component registry");
@@ -47,7 +47,7 @@ export default class ThreeEntity extends HTMLElement {
 			attributeOldValue: true,
 			attributeFilter: [ 
 				...componentRegistry.keys(),
-				...entity.constructor.mappedProperties
+				...Object.keys(entity.constructor.mappings)
 			]
 		});
 	}// constructor
@@ -197,8 +197,7 @@ export default class ThreeEntity extends HTMLElement {
 			} 
 
 			// if the attribute maps to a property that the entity itself manages - apply that mapping
-			else if (this.#entity.constructor.mappedProperties.includes(attributeName)){
-				console.log("ra!")
+			else if (Object.keys(this.#entity.constructor.mappings).includes(attributeName)){
 				this.#mapAttributeToProperty(attributeName, value);
 			}
 
