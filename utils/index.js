@@ -10,7 +10,6 @@ export function generateComponentFromAttribute(name, value){
 }// generateComponentFromAttribute
 
 export function parseAttributeValueAsJSON(attribute = ""){
-	console.warn("[TODO] Parsing attribute values as JSON does not currently convert to THREE.js types - may need further refactoring to support this");
 	return !!attribute
 		? JSON.parse(`{${
 			attribute.split(";")
