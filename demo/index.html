@@ -45,19 +45,9 @@
 						"color": "material.color"
 					}
 				}// get mappings
-
-				connected(){
-					super.connected();
-					console.log("box connected")
-				}// connected
 			}// ThreeEntity
 
 			class ThreeBoxElement extends ThreeEntityElement {
-				constructor(){
-					super();
-
-					console.log("three box created")
-				}// constructor
 				init(){
 					return new Box();
 				}// init
@@ -115,6 +105,7 @@
 
 			<three-box
 				position="-1 0 -3"
+				color="green"
 			></three-box>
 		</three-world>
 	</body>

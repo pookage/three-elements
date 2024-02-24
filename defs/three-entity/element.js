@@ -35,8 +35,6 @@ export default class ThreeEntityElement extends HTMLElement {
 		// initialise the three-ecs entity
 		const entity = this.#entity = this.init();
 
-		console.log("constructor", entity)
-
 		// create observers to mirror HTML elements with the underlying entities
 		const entityObserver    = this.#entityObserver    = new MutationObserver(this.#handleDOMMutation);
 		const componentObserver = this.#componentObserver = new MutationObserver(this.#handleAttributeChange);
@@ -180,7 +178,11 @@ export default class ThreeEntityElement extends HTMLElement {
 	}// #updateComponent
 
 	#mapAttributeToProperty = (name, attributeValue) => {
+		console.log("setting", name, "to", attributeValue);
+
 		const value = parseAttributeAsThreeValue(name, attributeValue);
+
+		console.log("parsed", attributeValue, "as", value);
 		this.#entity.applyProperty(name, value);
 	}// #mapAttributeToProperty
 

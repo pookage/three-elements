@@ -1,3 +1,4 @@
+import { Color } from "three";
 import { componentRegistry } from "three-ecs";
 
 export function generateComponentFromAttribute(name, value){
@@ -37,6 +38,9 @@ export function parseAttributeAsThreeValue(name, value){
 			}
 			case "visible": {
 				return value !== "false";
+			}
+			case "color": {
+				return new Color(value);
 			}
 		}
 }// parseAttributeAsThreeValue
