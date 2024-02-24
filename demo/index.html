@@ -2,6 +2,8 @@
 <html>
 	<head>
 		<title>THREE-Elements | Demo</title>
+
+		<!-- create an import map to  make for neater imports -->
 		<script type="importmap">
 			{
 				"imports": {
@@ -14,9 +16,13 @@
 				}
 			}
 		</script>
+
+		<!-- import custom element defintions, which import the required three-ecs definitions -->
 		<script type="module">
 			import "three-elements";
 		</script>
+
+		<!-- basic demo styles -->
 		<style>
 			* {
 				box-sizing: border-box;;
@@ -31,17 +37,20 @@
 		</style>
 	</head>
 	<body>
+		<!-- define a three.js scene using three-elements -->
 		<three-world>
+			<!-- camera -->
 			<three-entity
 				position="0 1.5 0"
 				rotation="-20 0 0"
 				camera
 			></three-entity>
 
+			<!-- basic "hello world" scene -->
 			<three-entity
 				position="1 0 -3"
-				geometry="primitive: box;"
-				material
+				geometry="primitive: box"
+				material="color: red"
 				mesh
 			></three-entity>
 			<three-entity
@@ -55,7 +64,7 @@
 			></three-entity>
 			<three-entity
 				position="-1 0 -3"
-				geometry="primitive: box;"
+				geometry="primitive: box"
 				material="color: green"
 				mesh
 			></three-entity>
