@@ -19,7 +19,51 @@
 
 		<!-- import custom element defintions, which import the required three-ecs definitions -->
 		<script type="module">
-			import "three-elements";
+			import { Color } from "three"
+			import { Entity } from "three-ecs";
+			import { ThreeEntityElement } from "three-elements";
+
+			class Box extends Entity {
+				static get defaultComponents(){
+					return {
+						geometry: {
+							primitive: "box",
+							height: 1,
+							width:  1,
+							depth:  1
+						},
+						material: {
+							color: new Color(0x0000ff)
+						},
+						mesh: {}
+					};
+				}// get defaultComponents
+
+				static get mappings(){
+					return {
+						...Entity.mappings,
+						"color": "material.color"
+					}
+				}// get mappings
+
+				connected(){
+					super.connected();
+					console.log("box connected")
+				}// connected
+			}// ThreeEntity
+
+			class ThreeBoxElement extends ThreeEntityElement {
+				constructor(){
+					super();
+
+					console.log("three box created")
+				}// constructor
+				init(){
+					return new Box();
+				}// init
+			}// ThreeBox
+
+			window.customElements.define("three-box", ThreeBoxElement);
 		</script>
 
 		<!-- basic demo styles -->
@@ -62,12 +106,16 @@
 				material="color: blue"
 				mesh
 			></three-entity>
-			<three-entity
+			<!-- <three-entity
 				position="-1 0 -3"
 				geometry="primitive: box"
 				material="color: green"
 				mesh
-			></three-entity>
+			></three-entity> -->
+
+			<three-box
+				position="-1 0 -3"
+			></three-box>
 		</three-world>
 	</body>
 </html>

@@ -1,2 +1,4 @@
-import ThreeEntity from "./defs/three-entity/index.js";
-import ThreeWorld from "./defs/three-world/index.js";
+import ThreeEntityElement from "./defs/three-entity/index.js";
+import ThreeWorldElement from "./defs/three-world/index.js";
+
+export { ThreeEntityElement };

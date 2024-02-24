@@ -3,18 +3,19 @@ import { Entity, componentRegistry, parseUnverifiedConfig } from "three-ecs";
 import { generateComponentFromAttribute, getComponentFromEntity, parseAttributeAsThreeValue } from "../../utils/index.js";
 
 
-export default class ThreeEntity extends HTMLElement {
+export default class ThreeEntityElement extends HTMLElement {
 	// PRIVATE PROPERTIES
 	// ---------------------------------
 	// DOM
 	#entity;
 
 	// BOUND METHODS
-	#addChildren;
+	#addChildren;	
 
-	// STATIC STATE
+	// HELPERS
 	#entityObserver;
 	#componentObserver;
+	#entityCheck;
 
 
 	// INTERFACE
@@ -34,6 +35,8 @@ export default class ThreeEntity extends HTMLElement {
 		// initialise the three-ecs entity
 		const entity = this.#entity = this.init();
 
+		console.log("constructor", entity)
+
 		// create observers to mirror HTML elements with the underlying entities
 		const entityObserver    = this.#entityObserver    = new MutationObserver(this.#handleDOMMutation);
 		const componentObserver = this.#componentObserver = new MutationObserver(this.#handleAttributeChange);
@@ -50,7 +53,7 @@ export default class ThreeEntity extends HTMLElement {
 			else {
 				console.warn(
 					"[WARNING](Entity) Unknown component", 
-					attributeName, 
+					name, 
 					"added to",
 					this,
 					" - the component has probably not been registered; make sure the component has been imported to register it."
@@ -80,6 +83,7 @@ export default class ThreeEntity extends HTMLElement {
 	}// init
 
 	disconnectedCallback(){
+		cancelAnimationFrame(this.#entityCheck);
 		this.#entityObserver.disconnect();
 		this.entity.disconnected();
 		this.entity.parent.remove(this.entity);
@@ -133,16 +137,28 @@ export default class ThreeEntity extends HTMLElement {
 		}
 	}// #addECSElements
 	#addECSElement = element => {
-		if(element){
+		/*
+			NOTE: 
+				because we can't know for sure when the custom-element definition will be registered
+				it might be the case that the parent receives the custom element before it has its functionality;
+				in which case the entity would not be present when the MutationObserver fires its observation -
+				the workaround for this is to treat the mutation as the trigger to start looking for the entity
+				instead of assuming it'll be there from the get-go.
+		*/
+		const checkForEntity = () => {
 			const { entity } = element;
+
 			if(entity){
 				// store a reference to the element on the entity
 				entity.element = element;
 
 				// add the entity to the scene
 				this.entity.add(entity);
-			}
-		}
+			} else this.#entityCheck = requestAnimationFrame(checkForEntity);
+		}// checkForEntity
+
+		// start looking for the entity
+		checkForEntity();
 	}// #addECSElement
 
 	#addComponent = (name, value) => {

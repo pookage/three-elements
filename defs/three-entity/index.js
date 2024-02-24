@@ -1,11 +1,11 @@
-import ThreeEntity from "./element.js";
+import ThreeEntityElement from "./element.js";
 
 const element = {
 	tagName: "three-entity",
-	definition: ThreeEntity
+	definition: ThreeEntityElement
 };
 
 window.customElements.define(element.tagName, element.definition);
 
-export { element, ThreeEntity };
-export default ThreeEntity;
+export { element, ThreeEntityElement };
+export default ThreeEntityElement;
