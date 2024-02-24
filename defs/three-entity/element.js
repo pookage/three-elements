@@ -1,6 +1,6 @@
 import { Entity, componentRegistry, parseUnverifiedConfig } from "three-ecs";
 
-import { generateComponentFromAttribute, getComponentFromEntity, parseAttributeAsThreeValue } from "../../utils/index.js";
+import { generateComponentFromAttribute, getComponentFromEntity } from "../../utils/index.js";
 
 
 export default class ThreeEntityElement extends HTMLElement {
@@ -45,7 +45,7 @@ export default class ThreeEntityElement extends HTMLElement {
 			if(componentRegistry.has(name)) this.#addComponent(name, value);
 			// if the attribute is a mapped property, then apply the mapping directly to the entity
 			else if (Object.keys(entity.constructor.mappings).includes(name)){
-				this.#mapAttributeToProperty(name, value);
+				this.#mapAttributeToProperty(name, value, entity.constructor.mappings[name]);
 			}
 			// otherwise dispatch a scolding for having useless attributes
 			else {
@@ -177,13 +177,8 @@ export default class ThreeEntityElement extends HTMLElement {
 		Object.apply(component.data, verifiedConfig);
 	}// #updateComponent
 
-	#mapAttributeToProperty = (name, attributeValue) => {
-		console.log("setting", name, "to", attributeValue);
-
-		const value = parseAttributeAsThreeValue(name, attributeValue);
-
-		console.log("parsed", attributeValue, "as", value);
-		this.#entity.applyProperty(name, value);
+	#mapAttributeToProperty = (name, attributeValue, mappedProperty) => {
+		this.#entity.applyProperty(name, attributeValue);
 	}// #mapAttributeToProperty
 
 }// ThreeEntity

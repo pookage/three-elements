@@ -28,23 +28,6 @@ export function parseAttributeValueAsJSON(attribute = ""){
 		: {}
 }// parseAttributeValueAsJSON
 
-export function parseAttributeAsThreeValue(name, value){
-	switch(name){
-			case "position":
-			case "rotation":
-			case "scale": {
-				const [ x, y, z ] = value.split(" ");
-				return { x, y, z };
-			}
-			case "visible": {
-				return value !== "false";
-			}
-			case "color": {
-				return new Color(value);
-			}
-		}
-}// parseAttributeAsThreeValue
-
 export function getComponentFromEntity(componentName, entity){
 	const name      = componentRegistry.get(componentName).name;
 	const component = entity.components.get(name);
