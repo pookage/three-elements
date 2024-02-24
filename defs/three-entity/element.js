@@ -43,7 +43,7 @@ export default class ThreeEntity extends HTMLElement {
 			// add any components specified as attributes
 			if(componentRegistry.has(name)) this.#addComponent(name, value);
 			// if the attribute is a mapped property, then apply the mapping directly to the entity
-			else if (entity.constructor.mappedProperties.includes(name)){
+			else if (Object.keys(entity.constructor.mappings).includes(name)){
 				this.#mapAttributeToProperty(name, value);
 			}
 			// otherwise dispatch a scolding for having useless attributes
@@ -70,7 +70,7 @@ export default class ThreeEntity extends HTMLElement {
 			attributeOldValue: true,
 			attributeFilter: [ 
 				...componentRegistry.keys(),
-				...entity.constructor.mappedProperties
+				...Object.keys(entity.constructor.mappings)
 			]
 		});
 	}// constructor
@@ -108,7 +108,7 @@ export default class ThreeEntity extends HTMLElement {
 				else                       this.#updateComponent(attributeName, value);
 			}
 			// if the attribute is a mapped property, then apply the mapping directly to the entity
-			else if(this.#entity.constructor.mappedProperties.includes(attributeName)){
+			else if(Object.keys(this.#entity.constructor.mappings).includes(attributeName)){
 				this.#mapAttributeToProperty(attributeName, value);
 			} 
 			// otherwise dispatch a scolding for having useless attributes
@@ -127,17 +127,10 @@ export default class ThreeEntity extends HTMLElement {
 
 	// UTILS
 	// ---------------------------------
-	#addECSElements = elements => {
-		console.warn("[TODO] Confirm if the visibility check here is necessary following the refactor")
-		// if the page is visible, then go ahead and build the DOM 
-		if(document.visibilityState === "visible" && elements){
-			document.removeEventListener("visibilitychange", this.#addChildren);
-			for(const element of elements){
-				this.#addECSElement(element);
-			}
-		} 
-		// if the page is not initially visible, then hold-off adding children to avoid lifecycle errors
-		else document.addEventListener("visibilitychange", this.#addChildren);
+	#addECSElements = elements => {	
+		for(const element of elements){
+			this.#addECSElement(element);
+		}
 	}// #addECSElements
 	#addECSElement = element => {
 		if(element){

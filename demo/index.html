@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>THREECS | Demo</title>
+		<title>THREE-Elements | Demo</title>
 		<script type="importmap">
 			{
 				"imports": {
@@ -10,12 +10,12 @@
 					"three-ecs"       : "../lib/three-ecs/index.js",
 					"three-ecs/"      : "../lib/three-ecs/",
 					"three-elements"  : "../index.js",
-					"three-elements/" / "../"
+					"three-elements/" : "../"
 				}
 			}
 		</script>
 		<script type="module">
-
+			import "three-elements";
 		</script>
 		<style>
 			* {
@@ -32,7 +32,33 @@
 	</head>
 	<body>
 		<three-world>
-			
+			<three-entity
+				position="0 1.5 0"
+				rotation="-20 0 0"
+				camera
+			></three-entity>
+
+			<three-entity
+				position="1 0 -3"
+				geometry="primitive: box;"
+				material
+				mesh
+			></three-entity>
+			<three-entity
+				position="0 0.5 -5"
+				geometry="
+					primitive: sphere;
+					radius: 1;
+				"
+				material="color: blue"
+				mesh
+			></three-entity>
+			<three-entity
+				position="-1 0 -3"
+				geometry="primitive: box;"
+				material="color: green"
+				mesh
+			></three-entity>
 		</three-world>
 	</body>
 </html>
