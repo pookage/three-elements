@@ -1,0 +1,3 @@
+[submodule "lib/three-ecs"]
+	path = lib/three-ecs
+	url = https://github.com/pookage/three-ecs.git
