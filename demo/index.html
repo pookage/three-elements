@@ -19,8 +19,16 @@
 
 		<!-- import custom element defintions, which import the required three-ecs definitions -->
 		<script type="module">
-			import { ThreeEntityElement, attributeRegistry } from "three-elements";
+			import { ThreeEntity, attributeRegistry } from "three-elements";
 			import { Entity, Component, System, Geometry, Material, Mesh } from "three-ecs";
+
+			console.log(`					
+				You are here:
+					1. you have recently refactored three-elements to support three-ecs Systems as attributes
+					2. you are encountering a problem where custom element definitions are initialised and attempting to parse non-core attributes as components & systems before they have been added to the attributeRegistry
+					3. the solution is probably to delay the custom-element registrations until the custom components etc have been registered
+						3.1. We could have a ThreeElements.init(entities, components, systems, elements) which is what starts-up everything, but it would be cool to do it automatically if possible
+			`);
 
 			// CUSTOM COMPONENTS
 			// ---------------------------------------------
@@ -46,7 +54,7 @@
 				}// #handleNoisySystemUpdate
 			}// NoisyComponent
 
-			attributeRegistry.set("noisy-component", NoisyComponent);
+			attributeRegistry.set("noisy", NoisyComponent);
 
 
 			// CUSTOM SYSTEMS
@@ -63,7 +71,7 @@
 				constructor(){
 					super();
 
-					this.#interval = setInterval(this.update.bind(this), 5000);
+					this.#interval = setInterval(this.update.bind(this), 1000);
 				}// constructor
 
 				added(entity){
@@ -99,6 +107,12 @@
 						}]
 					])
 				}
+				static get mappings(){
+					return {
+						...super.mappings,
+						"message": [ NoisyComponent, "message" ]
+					}
+				}// get mappings
 			}// NoisyEntity
 
 			class Box extends Entity {
@@ -127,20 +141,20 @@
 
 			// CUSTOM ELEMENTS
 			// ---------------------------------------------
-			class ThreeBoxElement extends ThreeEntityElement {
+			class ThreeBoxElement extends ThreeEntity {
 				init(){
 					return new Box();
 				}// init
 			}// ThreeBox
 
-			class ThreeNoisyElement extends ThreeEntityElement {
+			class ThreeNoisyElement extends ThreeEntity {
 				init(){
 					return new NoisyEntity();
 				}// init
 			}// ThreeNoisyElement
 
 			window.customElements.define("three-box", ThreeBoxElement);
-			window.customElements.define("three-noisy", ThreeNoisyElement)
+			window.customElements.define("three-noisy", ThreeNoisyElement);
 		</script>
 
 		<!-- basic demo styles -->
@@ -161,11 +175,12 @@
 		<!-- define a three.js scene using three-elements -->
 		<three-world noisy-system>
 			<!-- camera -->
-			<three-entity
+			<three-noisy
 				position="0 1.5 0"
 				rotation="-20 0 0"
 				camera
-			></three-entity>
+				message="cameracameramcaeramcaemramcamer"
+			></three-noisy>
 
 			<!-- basic "hello world" scene -->
 			<three-entity
@@ -173,6 +188,7 @@
 				geometry="primitive: box"
 				material="color: red"
 				mesh
+				noisy="message: redredredredred"
 			></three-entity>
 			<three-entity
 				position="0 0.5 -5"
@@ -183,13 +199,6 @@
 				material="color: blue"
 				mesh
 			></three-entity>
-			<!-- <three-entity
-				position="-1 0 -3"
-				geometry="primitive: box"
-				material="color: green"
-				mesh
-			></three-entity> -->
-
 			<three-box
 				position="-1 0 -3"
 				monkey="#00ff00"

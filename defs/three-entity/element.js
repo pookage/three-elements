@@ -7,7 +7,7 @@ import {
 } from "../../utils/index.js";
 
 
-export default class ThreeEntityElement extends HTMLElement {
+export default class ThreeEntity extends HTMLElement {
 	// PRIVATE PROPERTIES
 	// ---------------------------------
 	// DOM
@@ -18,7 +18,7 @@ export default class ThreeEntityElement extends HTMLElement {
 
 	// HELPERS
 	#entityObserver;
-	#componentObserver;
+	#attributeObserver;
 	#entityCheck;
 
 
@@ -41,29 +41,10 @@ export default class ThreeEntityElement extends HTMLElement {
 
 		// create observers to mirror HTML elements with the underlying entities
 		const entityObserver    = this.#entityObserver    = new MutationObserver(this.#handleDOMMutation);
-		const componentObserver = this.#componentObserver = new MutationObserver(this.#handleAttributeChange);
+		const attributeObserver = this.#attributeObserver = new MutationObserver(this.#handleAttributeChange);
 
 		// apply attributes to the underlying entity
-		for(const { name, value } of this.attributes){
-			// add any components specified as attributes
-			if(attributeRegistry.has(name)) this.#addRegisteredInstance(name, value);
-			// if the attribute is a mapped property, then apply the mapping directly to the entity
-			else if (Object.keys(entity.constructor.mappings).includes(name)){
-				this.#mapAttributeToProperty(name, value, entity.constructor.mappings[name]);
-			}
-			// otherwise dispatch a scolding for having useless attributes
-			else {
-				console.warn(
-					`[WARNING](Entity) Unknown attribute '${name}' added to`, 
-					this,
-					" - make sure it has been added to in the attributeRegistry", 
-					attributeRegistry,
-					`or included in the '${entity.constructor.name}' entity mappings`,
-					entity.constructor.mappings,
-					"to a component in the attributeRegistry."
-				);
-			}
-		}
+		this.#applyAttributesToEntity(this.attributes, entity);
 
 		// translate the existing DOM into the Scene tree
 		this.#addECSElements(this.children);
@@ -72,7 +53,7 @@ export default class ThreeEntityElement extends HTMLElement {
 		entityObserver.observe(this, { childList: true })
 
 		// observe any changes to this component's attributes that match the list of registered components
-		componentObserver.observe(this, { 
+		attributeObserver.observe(this, { 
 			attribute: true,
 			attributeOldValue: true,
 			attributeFilter: [ 
@@ -80,15 +61,30 @@ export default class ThreeEntityElement extends HTMLElement {
 				...Object.keys(entity.constructor.mappings)
 			]
 		});
+
+		if(this.constructor.mappings){
+			console.warn(
+				"[WARNING](ThreeEntity) Whoops! Looks like you've added some mappings",
+				this.constructor.mappings,
+				"to the custom element definition for",
+				this,
+				`instead of its underlying '${entity.constructor.name}' entity!`,
+				"This probably won't have the effect you're after -",
+				`you should add them to the ${entity.constructor.name} instead 👍`
+			);
+		}
 	}// constructor
 	init(){
 		// create the underlying entity that the element wraps
 		return new Entity();
 	}// init
 
+	connectedCallback(){ }// connectedCallback
+
 	disconnectedCallback(){
 		cancelAnimationFrame(this.#entityCheck);
 		this.#entityObserver.disconnect();
+		this.#attributeObserver.disconnect();
 		this.entity.disconnected();
 		this.entity.parent.remove(this.entity);
 	}// disconnectedCallback
@@ -122,11 +118,13 @@ export default class ThreeEntityElement extends HTMLElement {
 			// otherwise dispatch a scolding for having useless attributes
 			else {
 				console.warn(
-					"[WARNING](Entity) Unknown component", 
-					attributeName, 
-					"added to",
+					`[WARNING](Entity) Unknown attribute '${name}' changed on`, 
 					this,
-					" - the component has probably not been registered; make sure the component has been imported to register it."
+					" - make sure it has been added to in the attributeRegistry", 
+					attributeRegistry,
+					`or included in the '${entity.constructor.name}' entity mappings`,
+					entity.constructor.mappings,
+					"to a definition in the attributeRegistry."
 				);
 			}
 		}
@@ -135,6 +133,29 @@ export default class ThreeEntityElement extends HTMLElement {
 
 	// UTILS
 	// ---------------------------------
+	#applyAttributesToEntity = (attributes, entity) => {
+		for(const { name, value } of attributes){
+			// add any components specified as attributes
+			if(attributeRegistry.has(name)) this.#addRegisteredInstance(name, value);
+			// if the attribute is a mapped property, then apply the mapping directly to the entity
+			else if (Object.keys(entity.constructor.mappings).includes(name)){
+				this.#mapAttributeToProperty(name, value, entity.constructor.mappings[name]);
+			}
+			// otherwise dispatch a scolding for having useless attributes
+			else {
+				console.warn(
+					`[WARNING](Entity) Unknown attribute '${name}' changed on`, 
+					this,
+					" - make sure it has been added to in the attributeRegistry", 
+					attributeRegistry,
+					`or included in the '${entity.constructor.name}' entity mappings`,
+					entity.constructor.mappings,
+					"to a definition in the attributeRegistry."
+				);
+			}
+		}
+	}// #applyAttributesToEntity
+
 	#addECSElements = elements => {	
 		for(const element of elements){
 			this.#addECSElement(element);
