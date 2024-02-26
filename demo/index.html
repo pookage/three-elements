@@ -19,33 +19,31 @@
 
 		<!-- import custom element defintions, which import the required three-ecs definitions -->
 		<script type="module">
-			import { Color } from "three"
-			import { Entity } from "three-ecs";
 			import { ThreeEntityElement } from "three-elements";
+			import { Entity, Geometry, Material, Mesh } from "three-ecs";
 
 			class Box extends Entity {
 				static get defaultComponents(){
-					return {
-						geometry: {
+					return new Map([
+						[ Geometry, {
 							primitive: "box",
 							height: 1,
 							width:  1,
 							depth:  1
-						},
-						material: {
-							color: new Color(0x0000ff)
-						},
-						mesh: {}
-					};
+						}],
+						[ Material, {
+							color: 0x00ff00
+						}],
+						[ Mesh ]
+					])
 				}// get defaultComponents
-
 				static get mappings(){
 					return {
 						...Entity.mappings,
-						"monkey": "material.color"
-					}
+						"monkey": [ Material, "color" ]
+					};
 				}// get mappings
-			}// ThreeEntity
+			}// Box
 
 			class ThreeBoxElement extends ThreeEntityElement {
 				init(){

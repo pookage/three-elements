@@ -1,6 +1,10 @@
-import { Entity, componentRegistry, parseUnverifiedConfig } from "three-ecs";
+import { Entity, parseUnverifiedConfig } from "three-ecs";
 
-import { generateComponentFromAttribute, getComponentFromEntity } from "../../utils/index.js";
+import { 
+	generateComponentFromAttribute, 
+	getComponentFromEntity, 
+	attributeRegistry 
+} from "../../utils/index.js";
 
 
 export default class ThreeEntityElement extends HTMLElement {
@@ -42,7 +46,7 @@ export default class ThreeEntityElement extends HTMLElement {
 		// apply attributes to the underlying entity
 		for(const { name, value } of this.attributes){
 			// add any components specified as attributes
-			if(componentRegistry.has(name)) this.#addComponent(name, value);
+			if(attributeRegistry.has(name)) this.#addComponent(name, value);
 			// if the attribute is a mapped property, then apply the mapping directly to the entity
 			else if (Object.keys(entity.constructor.mappings).includes(name)){
 				this.#mapAttributeToProperty(name, value, entity.constructor.mappings[name]);
@@ -50,11 +54,13 @@ export default class ThreeEntityElement extends HTMLElement {
 			// otherwise dispatch a scolding for having useless attributes
 			else {
 				console.warn(
-					"[WARNING](Entity) Unknown component", 
-					name, 
-					"added to",
+					`[WARNING](Entity) Unknown attribute '${name}' added to`, 
 					this,
-					" - the component has probably not been registered; make sure the component has been imported to register it."
+					" - make sure it has been added to in the attributeRegistry", 
+					attributeRegistry,
+					`or included in the '${entity.constructor.name}' entity mappings`,
+					entity.constructor.mappings,
+					"to a component in the attributeRegistry."
 				);
 			}
 		}
@@ -70,7 +76,7 @@ export default class ThreeEntityElement extends HTMLElement {
 			attribute: true,
 			attributeOldValue: true,
 			attributeFilter: [ 
-				...componentRegistry.keys(),
+				...attributeRegistry.keys(),
 				...Object.keys(entity.constructor.mappings)
 			]
 		});
