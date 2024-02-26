@@ -1,6 +1,9 @@
 import { Color } from "three";
 
-import { Geometry, Material, Mesh, Camera } from "three-ecs";
+import {
+	Component, System,
+	Geometry, Material, Mesh, Camera 
+} from "three-ecs";
 
 // map core three-ecs components to strings that would make for valid HTML attributes
 export const attributeRegistry = new Map(
@@ -10,13 +13,13 @@ export const attributeRegistry = new Map(
 	]))
 );
 
-export function generateComponentFromAttribute(attribute, value){
-	const ComponentConstructor = attributeRegistry.get(attribute);
-	const config               = parseAttributeValueAsJSON(value)
-	const component            = new ComponentConstructor(config);
+export function generateInstanceFromAttribute(attribute, value){
+	const Constructor = attributeRegistry.get(attribute);
+	const config      = parseAttributeValueAsJSON(value)
+	const instance    = new Constructor(config);
 
-	return component;
-}// generateComponentFromAttribute
+	return instance;
+}// generateInstanceFromAttribute
 
 export function parseAttributeValueAsJSON(attribute = ""){
 	return !!attribute
@@ -36,12 +39,27 @@ export function parseAttributeValueAsJSON(attribute = ""){
 		: {}
 }// parseAttributeValueAsJSON
 
-export function getComponentFromEntity(attribute, entity){
-	const ComponentConstructor = attributeRegistry.get(attribute);
-	const component            = entity.components.get(ComponentConstructor);
+export function getInstanceFromEntity(attribute, entity){
+	const Constructor = attributeRegistry.get(attribute);
 
-	return component;
-}// getComponentFromEntity
+	let instance;
+	if      (Constructor instanceof Component) instance = entity.components.get(Constructor);
+	else if (Constructor instanceof System)    instance = entity.systems.get(Constructor);
+	else {
+		console.warn(
+			`WARNING](three-elements) Unable to get attribute: ${attribute} as ${Constructor?.name}`,
+			"from",
+			entity,
+			"via",
+			entity.element,
+			`as it is not an instance of either the ${Component.name} or ${System.name} class`,
+			`- please ensure that the ${Constructor.name} extends either ${Component.name} or ${System.name}`,
+			"which can be imported from the three-ecs library directly"
+		);
+	}
+
+	return instance;
+}// getInstanceFromEntity
 
 export function toKebab(str){
 	// NOTE: this was taken from ABabin's answer on stackoverflow: https://stackoverflow.com/questions/63116039/camelcase-to-kebab-case

@@ -19,8 +19,87 @@
 
 		<!-- import custom element defintions, which import the required three-ecs definitions -->
 		<script type="module">
-			import { ThreeEntityElement } from "three-elements";
-			import { Entity, Geometry, Material, Mesh } from "three-ecs";
+			import { ThreeEntityElement, attributeRegistry } from "three-elements";
+			import { Entity, Component, System, Geometry, Material, Mesh } from "three-ecs";
+
+			// CUSTOM COMPONENTS
+			// ---------------------------------------------
+			class NoisyComponent extends Component {
+				static get schema(){
+					return {
+						message: {
+							default: "monkey"
+						}
+					}
+				}// get schema
+
+				added(entity){
+					super.added(entity);
+
+					entity.addEventListener("SYSTEM__NOISY_SYSTEM__UPDATE", this.#handleNoisySystemUpdate);
+
+					console.log("Noisy component added!");
+				}// added
+
+				#handleNoisySystemUpdate = event => {
+					console.log(`The noisy system told me to say: ${this.data.message}!`);
+				}// #handleNoisySystemUpdate
+			}// NoisyComponent
+
+			attributeRegistry.set("noisy-component", NoisyComponent);
+
+
+			// CUSTOM SYSTEMS
+			// ---------------------------------------------
+			class NoisySystem extends System {
+				#interval;
+
+				static get autoregister(){
+					return [
+						NoisyComponent
+					]
+				}// get autoregister
+
+				constructor(){
+					super();
+
+					this.#interval = setInterval(this.update.bind(this), 5000);
+				}// constructor
+
+				added(entity){
+					super.added(entity);
+
+					console.log("Noisy system added!");
+				}// added
+				removed(entity){
+					super.removed(entity);
+
+					clearInterval(this.#interval);
+				}// removed
+
+				update(){
+					for(const component of this.registeredComponentList.values()){
+						component.entity.dispatchEvent({
+							type: "SYSTEM__NOISY_SYSTEM__UPDATE"
+						});
+					}
+				}// update
+			}// NoisySystem
+
+			attributeRegistry.set("noisy-system", NoisySystem);
+
+
+			// CUSTOM ENTITIES
+			// ---------------------------------------------
+			class NoisyEntity extends Entity {
+				static get defaultComponents(){
+					return new Map([
+						[ NoisyComponent, {
+							"message": "ahoy"
+						}]
+					])
+				}
+			}// NoisyEntity
 
 			class Box extends Entity {
 				static get defaultComponents(){
@@ -45,13 +124,23 @@
 				}// get mappings
 			}// Box
 
+
+			// CUSTOM ELEMENTS
+			// ---------------------------------------------
 			class ThreeBoxElement extends ThreeEntityElement {
 				init(){
 					return new Box();
 				}// init
 			}// ThreeBox
 
+			class ThreeNoisyElement extends ThreeEntityElement {
+				init(){
+					return new NoisyEntity();
+				}// init
+			}// ThreeNoisyElement
+
 			window.customElements.define("three-box", ThreeBoxElement);
+			window.customElements.define("three-noisy", ThreeNoisyElement)
 		</script>
 
 		<!-- basic demo styles -->
@@ -70,7 +159,7 @@
 	</head>
 	<body>
 		<!-- define a three.js scene using three-elements -->
-		<three-world>
+		<three-world noisy-system>
 			<!-- camera -->
 			<three-entity
 				position="0 1.5 0"

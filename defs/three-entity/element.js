@@ -1,8 +1,8 @@
-import { Entity, parseUnverifiedConfig } from "three-ecs";
+import { Entity, Component, System, parseUnverifiedConfig } from "three-ecs";
 
 import { 
-	generateComponentFromAttribute, 
-	getComponentFromEntity, 
+	generateInstanceFromAttribute, 
+	getInstanceFromEntity, 
 	attributeRegistry 
 } from "../../utils/index.js";
 
@@ -46,7 +46,7 @@ export default class ThreeEntityElement extends HTMLElement {
 		// apply attributes to the underlying entity
 		for(const { name, value } of this.attributes){
 			// add any components specified as attributes
-			if(attributeRegistry.has(name)) this.#addComponent(name, value);
+			if(attributeRegistry.has(name)) this.#addRegisteredInstance(name, value);
 			// if the attribute is a mapped property, then apply the mapping directly to the entity
 			else if (Object.keys(entity.constructor.mappings).includes(name)){
 				this.#mapAttributeToProperty(name, value, entity.constructor.mappings[name]);
@@ -107,13 +107,13 @@ export default class ThreeEntityElement extends HTMLElement {
 	#handleAttributeChange = mutations => {
 		for(const { attributeName, oldValue } of mutations){
 			// if the attribute maps to a component apply the mutation as a component
-			if(componentRegistry.has(attributeName)){
-				const componentWasRemoved = value === undefined;
-				const componentWasAdded   = !!value && oldValue === null;
+			if(attributeRegistry.has(attributeName)){
+				const attributeWasRemoved = value === undefined;
+				const attributeWasAdded   = !!value && oldValue === null;
 
-				if(componentWasRemoved)    this.#removeComponent(attributeName);
-				else if(componentWasAdded) this.#addComponent(attributeName, value);
-				else                       this.#updateComponent(attributeName, value);
+				if(attributeWasRemoved)    this.#removeInstance(attributeName);
+				else if(attributeWasAdded) this.#addRegisteredInstance(attributeName, value);
+				else                       this.#updateInstance(attributeName, value);
 			}
 			// if the attribute is a mapped property, then apply the mapping directly to the entity
 			else if(Object.keys(this.#entity.constructor.mappings).includes(attributeName)){
@@ -165,23 +165,61 @@ export default class ThreeEntityElement extends HTMLElement {
 		checkForEntity();
 	}// #addECSElement
 
-	#addComponent = (name, value) => {
-		const component = generateComponentFromAttribute(name, value);
+	#addRegisteredInstance = (attribute, value) => {
+		const instance = generateInstanceFromAttribute(attribute, value);
 
-		this.#entity.addComponent(component);
-	}// #addComponent
-	#removeComponent = name => {
-		const component = getComponentFromEntity(name, this.#entity);
+		if(instance instanceof Component)   this.#entity.addComponent(instance);
+		else if(instance instanceof System) this.#entity.addSystem(instance);
+		else {
+			console.warn(
+				`WARNING](three-elements) Unable to add attribute: ${attribute} as ${instance?.constructor?.name}`,
+				"to",
+				this.#entity,
+				"via",
+				this,
+				`as ${instance?.constructor?.name} is not an instance of either the ${Component.name} or ${System.name} class`,
+				`- please ensure that the ${instance?.constructor?.name} extends either ${Component.name} or ${System.name}`,
+				"which can be imported from the three-ecs library directly"
+			);
+		}
+	}// #addRegisteredInstance
+	#removeInstance = attribute => {
+		const Constructor = attributeRegistry.get(attribute);
 
-		this.#entity.removeComponent(component);
-	}// #removeComponent
-	#updateComponent = (name, value) => {
-		const component        = getComponentFromEntity(name, this.#entity);
+		// add the attribute as a component if it was registered as a component
+		if(Constructor instanceof Component){
+			this.#entity.removeComponent(
+				this.#entity.components.get(Constructor)
+			);
+		}
+		// add the attribute as a system if it was registered as a system
+		else if (Constructor instanceof System){
+			this.#entity.removeSystem(
+				this.#entity.systems.get(Constructor)
+			)
+		}
+		// if it was registered as an unrecognised type then warn of an implementation error
+		else {
+			console.warn(
+				`WARNING](three-elements) Unable to remove attribute: ${attribute} as ${Constructor?.name}`,
+				"from",
+				entity,
+				"via",
+				entity.element,
+				`as it is not an instance of either the ${Component.name} or ${System.name} class`,
+				`- please ensure that the ${Constructor.name} extends either ${Component.name} or ${System.name}`,
+				"which can be imported from the three-ecs library directly"
+			);
+		}
+	}// #removeInstance
+	#updateInstance = (name, value) => {
+		const Constructor      = attributeRegistry.get(attribute);
+		const instance         = getInstanceFromEntity(Constructor, this.#entity);
 		const unverifiedConfig = parseAttributeValueAsJSON(value);
 		const config           = parseUnverifiedConfig(unverifiedConfig);
 
-		Object.apply(component.data, verifiedConfig);
-	}// #updateComponent
+		Object.apply(instance.data, verifiedConfig);
+	}// #updateInstance
 
 	#mapAttributeToProperty = (name, attributeValue, mappedProperty) => {
 		this.#entity.applyProperty(name, attributeValue);
