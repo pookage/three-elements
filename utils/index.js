@@ -1,7 +1,7 @@
 import { Color } from "three";
 
 import {
-	Component, System,
+	Component, System, Shader,
 	Geometry, Material, Mesh, Camera 
 } from "three-ecs";
 
@@ -13,9 +13,29 @@ export const attributeRegistry = new Map(
 	]))
 );
 
+// map core three-ecs values to strings of the same name, so that they can be used in attribute values
+export const definitionRegistry = new Map(
+	[ Shader ].map(Constructor => ([
+		Constructor.name,
+		Constructor
+	]))
+);
+
+function parseJSONConfig(json){
+	for(const [ key, value ] of Object.entries(json)){
+		if(definitionRegistry.has(value)){
+			const Constructor = definitionRegistry.get(value);
+			json[key] = new Constructor();
+		}
+	}
+
+	return json;
+}// parseJSONConfig
+
 export function generateInstanceFromAttribute(attribute, value){
 	const Constructor = attributeRegistry.get(attribute);
-	const config      = parseAttributeValueAsJSON(value)
+	const jsonConfig  = parseAttributeValueAsJSON(value);
+	const config      = parseJSONConfig(jsonConfig);
 	const instance    = new Constructor(config);
 
 	return instance;

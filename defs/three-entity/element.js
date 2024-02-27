@@ -3,7 +3,8 @@ import { Entity, Component, System, parseUnverifiedConfig } from "three-ecs";
 import { 
 	generateInstanceFromAttribute, 
 	getInstanceFromEntity, 
-	attributeRegistry 
+	attributeRegistry,
+	definitionRegistry
 } from "../../utils/index.js";
 
 
@@ -24,6 +25,8 @@ export default class ThreeEntity extends HTMLElement {
 
 	// INTERFACE
 	// ---------------------------------
+	// STATIC PROPERTIES
+	static get mappings(){ return {}; }// get mappings
 	// PUBLIC PROPERTIES
 	// ~~ getters ~~
 	get entity(){ return this.#entity; }
@@ -58,21 +61,10 @@ export default class ThreeEntity extends HTMLElement {
 			attributeOldValue: true,
 			attributeFilter: [ 
 				...attributeRegistry.keys(),
-				...Object.keys(entity.constructor.mappings)
+				...Object.keys(entity.constructor.mappings),
+				...Object.keys(this.constructor.mappings)
 			]
 		});
-
-		if(this.constructor.mappings){
-			console.warn(
-				"[WARNING](ThreeEntity) Whoops! Looks like you've added some mappings",
-				this.constructor.mappings,
-				"to the custom element definition for",
-				this,
-				`instead of its underlying '${entity.constructor.name}' entity!`,
-				"This probably won't have the effect you're after -",
-				`you should add them to the ${entity.constructor.name} instead 👍`
-			);
-		}
 	}// constructor
 	init(){
 		// create the underlying entity that the element wraps
@@ -115,18 +107,6 @@ export default class ThreeEntity extends HTMLElement {
 			else if(Object.keys(this.#entity.constructor.mappings).includes(attributeName)){
 				this.#mapAttributeToProperty(attributeName, value);
 			} 
-			// otherwise dispatch a scolding for having useless attributes
-			else {
-				console.warn(
-					`[WARNING](Entity) Unknown attribute '${name}' changed on`, 
-					this,
-					" - make sure it has been added to in the attributeRegistry", 
-					attributeRegistry,
-					`or included in the '${entity.constructor.name}' entity mappings`,
-					entity.constructor.mappings,
-					"to a definition in the attributeRegistry."
-				);
-			}
 		}
 	}// #handleAttributeChange
 
@@ -138,8 +118,10 @@ export default class ThreeEntity extends HTMLElement {
 			// add any components specified as attributes
 			if(attributeRegistry.has(name)) this.#addRegisteredInstance(name, value);
 			// if the attribute is a mapped property, then apply the mapping directly to the entity
-			else if (Object.keys(entity.constructor.mappings).includes(name)){
-				this.#mapAttributeToProperty(name, value, entity.constructor.mappings[name]);
+			else if(Object.keys(this.constructor.mappings).includes(name)){
+				this.#mapAttributeToProperty(this.constructor.mappings[name], value)
+			} else if (Object.keys(entity.constructor.mappings).includes(name)){
+				this.#mapAttributeToProperty(name, value);
 			}
 			// otherwise dispatch a scolding for having useless attributes
 			else {
@@ -242,8 +224,12 @@ export default class ThreeEntity extends HTMLElement {
 		Object.apply(instance.data, verifiedConfig);
 	}// #updateInstance
 
-	#mapAttributeToProperty = (name, attributeValue, mappedProperty) => {
-		this.#entity.applyProperty(name, attributeValue);
+	#mapAttributeToProperty = (name, attributeValue) => {
+		const value = definitionRegistry.has(attributeValue)
+			? new (definitionRegistry.get(attributeValue))
+			: attributeValue;
+
+		this.#entity.applyProperty(name, value);
 	}// #mapAttributeToProperty
 
 }// ThreeEntity
