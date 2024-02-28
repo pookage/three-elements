@@ -1,6 +1,9 @@
 import { attributeRegistry } from "./utils/index.js";
-import ThreeEntityElement, { ThreeEntity } from "./defs/three-entity/index.js";
-import ThreeWorldElement,  { ThreeWorld  } from "./defs/three-world/index.js";
+
+import { ThreeEntityElement } from "./defs/three-entity/index.js";
+import { ThreeWorldElement  } from "./defs/three-world/index.js";
+import elements from "./defs/index.js";
+
 
 /*
 	wait until any user-scripts have been parsed before adding core definitions
@@ -8,7 +11,7 @@ import ThreeWorldElement,  { ThreeWorld  } from "./defs/three-world/index.js";
 	instantiate the Components and Systems defined as attributes on the elements.
 */
 window.addEventListener("DOMContentLoaded", () => {
-	for(const { tagName, definition } of [ ThreeEntityElement, ThreeWorldElement ]){
+	for(const { tagName, definition } of elements){
 		window.customElements.define(tagName, definition)
 	}
 });
@@ -16,6 +19,6 @@ window.addEventListener("DOMContentLoaded", () => {
 
 export {
 	attributeRegistry,
-	ThreeEntity,
-	ThreeWorld
+	ThreeEntityElement,
+	ThreeWorldElement
 };

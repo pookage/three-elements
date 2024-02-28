@@ -1,11 +1,11 @@
 import { World } from "three-ecs";
 
-import { ThreeEntity } from "../three-entity/index.js";
+import { ThreeEntityElement } from "../three-entity/index.js";
 
 import styles from "./styles.css" assert { type: "css" };
 
 
-export default class ThreeWorld extends ThreeEntity {
+export default class ThreeWorldElement extends ThreeEntityElement {
 	// INTERFACE
 	// ---------------------------------
 	// PUBLIC METHODS
@@ -31,4 +31,4 @@ export default class ThreeWorld extends ThreeEntity {
 		this.entity.connected();
 		this.entity.play();
 	}// connectedCallback
-}// ThreeWorld
+}// ThreeWorldElement

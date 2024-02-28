@@ -1,9 +1,9 @@
-import ThreeWorld from "./element.js";
+import ThreeWorldElement from "./element.js";
 
 const element = {
 	tagName: "three-world",
-	definition: ThreeWorld
+	definition: ThreeWorldElement
 };
 
-export { element, ThreeWorld };
+export { element, ThreeWorldElement };
 export default element;

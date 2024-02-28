@@ -19,7 +19,7 @@
 
 		<!-- import custom element defintions, which import the required three-ecs definitions -->
 		<script type="module">
-			import { ThreeEntity, attributeRegistry } from "three-elements";
+			import { ThreeEntityElement, attributeRegistry } from "three-elements";
 			import { 
 				Entity, Component, System, Shader,
 				Geometry, Material, Mesh 
@@ -189,7 +189,7 @@
 
 			// CUSTOM ELEMENTS
 			// ---------------------------------------------
-			class ThreeBox extends ThreeEntity {
+			class ThreeBoxElement extends ThreeEntityElement {
 				static get mappings(){
 					return {
 						"monkey-color": "color"
@@ -198,23 +198,23 @@
 				init(){
 					return new Box();
 				}// init
-			}// ThreeBox
+			}// ThreeBoxElement
 
-			class ThreeShaderSphere extends ThreeEntity {
+			class ThreeShaderSphereElement extends ThreeEntityElement {
 				init(){
 					return new ShaderSphere();
 				}// init
-			}// ThreeShaderSphere
+			}// ThreeShaderSphereElement
 
-			class ThreeNoisy extends ThreeEntity {
+			class ThreeNoisyElement extends ThreeEntityElement {
 				init(){
 					return new NoisyEntity();
 				}// init
-			}// ThreeNoisy
+			}// ThreeNoisyElement
 
-			window.customElements.define("three-box", ThreeBox);
-			window.customElements.define("three-noisy", ThreeNoisy);
-			window.customElements.define("three-shader-sphere", ThreeShaderSphere);
+			window.customElements.define("three-box", ThreeBoxElement);
+			window.customElements.define("three-noisy", ThreeNoisyElement);
+			window.customElements.define("three-shader-sphere", ThreeShaderSphereElement);
 		</script>
 
 		<!-- basic demo styles -->

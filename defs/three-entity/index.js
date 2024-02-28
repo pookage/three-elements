@@ -1,9 +1,9 @@
-import ThreeEntity from "./element.js";
+import ThreeEntityElement from "./element.js";
 
 const element = {
 	tagName: "three-entity",
-	definition: ThreeEntity
+	definition: ThreeEntityElement
 };
 
-export { ThreeEntity };
+export { ThreeEntityElement };
 export default element;

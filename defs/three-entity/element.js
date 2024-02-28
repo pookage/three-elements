@@ -7,7 +7,7 @@ import {
 } from "../../utils/index.js";
 
 
-export default class ThreeEntity extends HTMLElement {
+export default class ThreeEntityElement extends HTMLElement {
 	// PRIVATE PROPERTIES
 	// ---------------------------------
 	// DOM
