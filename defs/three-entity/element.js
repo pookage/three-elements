@@ -3,8 +3,7 @@ import { Entity, Component, System, parseUnverifiedConfig } from "three-ecs";
 import { 
 	generateInstanceFromAttribute, 
 	getInstanceFromEntity, 
-	attributeRegistry,
-	definitionRegistry
+	attributeRegistry
 } from "../../utils/index.js";
 
 
@@ -225,11 +224,8 @@ export default class ThreeEntity extends HTMLElement {
 	}// #updateInstance
 
 	#mapAttributeToProperty = (name, attributeValue) => {
-		const value = definitionRegistry.has(attributeValue)
-			? new (definitionRegistry.get(attributeValue))
-			: attributeValue;
 
-		this.#entity.applyProperty(name, value);
+		this.#entity.applyProperty(name, attributeValue);
 	}// #mapAttributeToProperty
 
 }// ThreeEntity

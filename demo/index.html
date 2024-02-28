@@ -20,14 +20,40 @@
 		<!-- import custom element defintions, which import the required three-ecs definitions -->
 		<script type="module">
 			import { ThreeEntity, attributeRegistry } from "three-elements";
-			import { Entity, Component, System, Geometry, Material, Mesh } from "three-ecs";
+			import { 
+				Entity, Component, System, Shader,
+				Geometry, Material, Mesh 
+			} from "three-ecs";
 
 			console.log(`
 				TODO:
+					1. you have just added definitions mapping to mapAttributeToProperty, which is functioning but thorwing an error
+						1.1. it's possible that this error is a hangover and can be removed
 					2. refactor three-elements so that Entities are initialised with any components specified as attributes
 					3. check if (2) removes the need for DOMContentLoaded
 					4. rename 'Shader' to 'CustomShader' throughout three-elements and three-ecs
 			`)
+
+			// CUSTOM SHADERS
+			// ---------------------------------------------
+			class ScalingShader extends Shader {
+				static get vertex(){
+					return `
+						uniform float time;
+
+						varying vec3 v_Normal;
+
+						void main() {
+							float fasterTime = time * 3.0;
+							float timeWave   = (sin(fasterTime) + 1.0) / 2.0;
+							float scale      = (timeWave / 3.0) + 1.0;
+
+							gl_Position = projectionMatrix * modelViewMatrix * vec4(position * scale, 1.0);
+							v_Normal    = normal;
+						}
+					`;
+				}// get vertex
+			}// ScalingShader
 
 			// CUSTOM COMPONENTS
 			// ---------------------------------------------
@@ -132,21 +158,41 @@
 				static get mappings(){
 					return {
 						...Entity.mappings,
-						"color"        : [ Material, "color"  ],
-						"materialType" : [ Material, "type"   ],
-						"shader"       : [ Material, "shader" ]
+						"color" : [ Material, "color"  ]
 					};
 				}// get mappings
 			}// Box
 
+			class ShaderSphere extends Entity {
+				static get defaultComponents(){
+					return new Map([
+						[Geometry, {
+							primitive: "sphere",
+							radius: 1
+						}],
+						[ Material, {
+							type: "custom",
+							shader: new ScalingShader()
+						}],
+						[ Mesh ]
+					]);
+				}// get defaultComponents
+
+				static get mappings(){
+					return {
+						...super.mappings,
+						"radius": [ Geometry, "radius" ]
+					}
+				}
+			}// ShaderSphere
+
 
 			// CUSTOM ELEMENTS
 			// ---------------------------------------------
-			class ThreeBoxElement extends ThreeEntity {
+			class ThreeBox extends ThreeEntity {
 				static get mappings(){
 					return {
-						"monkey-color": "color",
-						"material-type": "materialType"
+						"monkey-color": "color"
 					}
 				}
 				init(){
@@ -154,14 +200,21 @@
 				}// init
 			}// ThreeBox
 
-			class ThreeNoisyElement extends ThreeEntity {
+			class ThreeShaderSphere extends ThreeEntity {
+				init(){
+					return new ShaderSphere();
+				}// init
+			}// ThreeShaderSphere
+
+			class ThreeNoisy extends ThreeEntity {
 				init(){
 					return new NoisyEntity();
 				}// init
-			}// ThreeNoisyElement
+			}// ThreeNoisy
 
-			window.customElements.define("three-box", ThreeBoxElement);
-			window.customElements.define("three-noisy", ThreeNoisyElement);
+			window.customElements.define("three-box", ThreeBox);
+			window.customElements.define("three-noisy", ThreeNoisy);
+			window.customElements.define("three-shader-sphere", ThreeShaderSphere);
 		</script>
 
 		<!-- basic demo styles -->
@@ -180,7 +233,7 @@
 	</head>
 	<body>
 		<!-- define a three.js scene using three-elements -->
-		<three-world>
+		<three-world noisy-system>
 			<!-- camera -->
 			<three-noisy
 				position="0 1.5 0"
@@ -197,22 +250,12 @@
 				mesh
 				noisy="message: redredredredred"
 			></three-entity>
-			<three-entity
+			<three-shader-sphere
 				position="0 0.5 -5"
-				geometry="
-					primitive: sphere;
-					radius: 1;
-				"
-				material="
-					type: custom;
-					shader: Shader;
-				"
-				mesh
-			></three-entity>
+			></three-shader-sphere>
 			<three-box
 				position="-1 0 -3"
-				material-type="custom"
-				shader="Shader"
+				color="#00ff00"
 			></three-box>
 		</three-world>
 	</body>

@@ -1,4 +1,4 @@
-import { attributeRegistry, definitionRegistry  } from "./utils/index.js";
+import { attributeRegistry } from "./utils/index.js";
 import ThreeEntityElement, { ThreeEntity } from "./defs/three-entity/index.js";
 import ThreeWorldElement,  { ThreeWorld  } from "./defs/three-world/index.js";
 
@@ -15,8 +15,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
 
 export {
-	attributeRegistry, 
-	definitionRegistry,
+	attributeRegistry,
 	ThreeEntity,
 	ThreeWorld
 };
