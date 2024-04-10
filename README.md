@@ -4,6 +4,6 @@ This project wraps the [Three-ECS](https://github.com/pookage/three-ecs) library
 
 ## Cloning the Repo
 
-```git
-	git clone --recurse-submodules -j8 https://github.com/pookage/three-elements.git` to clone the repo locally with all its dependencies
+```console
+git clone --recurse-submodules -j8 https://github.com/pookage/three-elements.git
 ```
