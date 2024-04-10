@@ -93,6 +93,8 @@ export default class ThreeEntityElement extends HTMLElement {
 
 	#handleAttributeChange = mutations => {
 		for(const { attributeName, oldValue } of mutations){
+			const value = this.getAttribute(attributeName);
+
 			// if the attribute maps to a component apply the mutation as a component
 			if(attributeRegistry.has(attributeName)){
 				const attributeWasRemoved = value === undefined;
