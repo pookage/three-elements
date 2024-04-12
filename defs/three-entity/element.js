@@ -28,7 +28,9 @@ export default class ThreeEntityElement extends HTMLElement {
 	static get mappings(){ return {}; }// get mappings
 	// PUBLIC PROPERTIES
 	// ~~ getters ~~
-	get entity(){ return this.#entity; }
+	get entity(){
+		return this.#entity;
+	}// get entity
 
 	// PUBLIC METHODS
 	// ~~ lifecycle jazz ~~
